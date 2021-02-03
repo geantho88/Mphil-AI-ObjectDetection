@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="XFObjectDetection.Views.MainPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="{Binding Title}">
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Label
+                Grid.Row="0"
+                FontSize="16"
+                Text="Mphil A.I Object Detection - Cognitive Service" />
+            <Image
+                Grid.Row="1"
+                Aspect="AspectFill"
+                IsVisible="{Binding IsImagePlaceholderVisible}"
+                Source="image_preview_placeholder.png" />
+            <Image
+                Grid.Row="1"
+                Aspect="AspectFit"
+                Source="{Binding ImageSource}" />
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button
+                    BackgroundColor="#0277bd"
+                    Command="{Binding PickPictureCommand}"
+                    Text="Pick" />
+                <Button
+                    Grid.Column="1"
+                    BackgroundColor="#0277bd"
+                    Command="{Binding TakePictureCommand}"
+                    Text="Take" />
+            </Grid>
+            <ScrollView
+                Grid.Row="1"
+                Margin="0,10,0,0"
+                VerticalScrollBarVisibility="Default">
+                <StackLayout>
+                    <Label FontSize="16" Text="Objects Found: " />
+                    <Label Text="{Binding ResultText}" />
+                </StackLayout>
+            </ScrollView>
+            <Button
+                Grid.Row="2"
+                BackgroundColor="#0277bd"
+                Text="Settings" />
+        </Grid>
+    </Grid>
+</ContentPage>
