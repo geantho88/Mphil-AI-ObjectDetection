@@ -1,21 +1,21 @@
 ﻿using Acr.UserDialogs;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
+using Microsoft.CognitiveServices.Speech;
 using Plugin.Media.Abstractions;
 using Plugin.Permissions.Abstractions;
 using Prism.Commands;
 using Prism.Navigation;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using XFObjectDetection.Common;
-using XFObjectDetection.Providers;
+using Xamarin.Essentials;
+using PermissionStatus = Plugin.Permissions.Abstractions.PermissionStatus;
+using System.Collections.Generic;
 
 namespace XFObjectDetection.ViewModels
 {
@@ -127,7 +127,7 @@ namespace XFObjectDetection.ViewModels
 
                 if (file != null)
                 {
-                    _userDialogs.ShowLoading();
+                    //_userDialogs.ShowLoading();
 
                     this.ImageSource = ImageSource.FromStream(() =>
                     {
@@ -137,7 +137,7 @@ namespace XFObjectDetection.ViewModels
 
                     await AnalyzeImage(file);
 
-                    _userDialogs.HideLoading();
+                    //_userDialogs.HideLoading();
                 }
             }
             else
@@ -157,10 +157,18 @@ namespace XFObjectDetection.ViewModels
 
 
                 var strBuilder = new StringBuilder();
-                foreach (var obj in imageAnalysis.Objects)
+
+                if (imageAnalysis.Objects != null && imageAnalysis.Objects.Any())
                 {
-                    strBuilder.AppendLine(string.Join(Environment.NewLine, obj.ObjectProperty) + " Confidence: " + (obj.Confidence * 100).ToString());
+                    await SynthesizeAudioAsync("objects found");
+
+                    foreach (var obj in imageAnalysis.Objects.OrderByDescending(a => a.Confidence))
+                    {
+                        strBuilder.AppendLine(string.Join(Environment.NewLine, obj.ObjectProperty) + " Confidence: " + (obj.Confidence * 100).ToString());
+                        await SynthesizeAudioAsync(obj.ObjectProperty);
+                    }
                 }
+
                 strBuilder.AppendLine(string.Empty);
                 ResultText = strBuilder.ToString();
             }
@@ -170,8 +178,18 @@ namespace XFObjectDetection.ViewModels
             }
         }
 
+        static async Task SynthesizeAudioAsync(string text)
+        {
+            await TextToSpeech.SpeakAsync(text);
+        }
+
         public async Task<DetectResult> MakeAnalysisRequest(string uriBase, string subscriptionKey, Stream imageStream)
         {
+            IList<VisualFeatureTypes?> features = new List<VisualFeatureTypes?>()
+                {
+                     VisualFeatureTypes.Description, VisualFeatureTypes.Faces, VisualFeatureTypes.Color, VisualFeatureTypes.Brands
+                };
+
             try
             {
                 var computerVision = new ComputerVisionClient(
@@ -181,6 +199,9 @@ namespace XFObjectDetection.ViewModels
                 computerVision.Endpoint = "https://mphilaivision.cognitiveservices.azure.com";
 
                 var analysis = await computerVision.DetectObjectsInStreamAsync(imageStream);
+
+
+                var extraAnalysis = await computerVision.AnalyzeImageInStreamAsync(imageStream, features, null, null);
 
                 return analysis;
             }
