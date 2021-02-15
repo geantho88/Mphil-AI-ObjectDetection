@@ -154,8 +154,6 @@ namespace XFObjectDetection.ViewModels
 
             if (imageAnalysis != null)
             {
-
-
                 var strBuilder = new StringBuilder();
 
                 if (imageAnalysis.Objects != null && imageAnalysis.Objects.Any())
@@ -201,7 +199,7 @@ namespace XFObjectDetection.ViewModels
                 var analysis = await computerVision.DetectObjectsInStreamAsync(imageStream);
 
 
-                var extraAnalysis = await computerVision.AnalyzeImageInStreamAsync(imageStream, features, null, null);
+                //var extraAnalysis = await computerVision.AnalyzeImageInStreamAsync(image2, features, null, null);
 
                 return analysis;
             }
